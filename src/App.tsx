@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import { fetchMenu, fetchWeather } from './api';
-import type { MenuData, MenuEntry, WeatherData } from './types';
+import { fetchMenu, fetchVisitors, fetchWeather } from './api';
+import type { MenuData, MenuEntry, VisitorStats, WeatherData } from './types';
 import { computeStatus } from './status';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -61,6 +61,7 @@ function GridCard({ place, onSelect }: { place: MenuEntry; onSelect: () => void 
 function App() {
   const [menu, setMenu] = useState<MenuData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [visitors, setVisitors] = useState<VisitorStats | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
@@ -69,6 +70,11 @@ function App() {
       .then((data) => {
         setMenu(data);
         setActiveId((prev) => prev ?? ALL_ID);
+        // 방문 기록은 백엔드가 GET /menu에서 남기므로, 그 뒤에 조회해야 이번 방문이 반영된다.
+        // 방문자 수는 부가 정보라 실패해도 화면 전체를 에러로 만들지 않는다.
+        fetchVisitors()
+          .then(setVisitors)
+          .catch(() => setVisitors(null));
       })
       .catch(() => setError(true));
     fetchWeather()
@@ -108,7 +114,19 @@ function App() {
       <div className="shell">
         <header className="header">
           <div className="header-left">
-            <span className="eyebrow">TODAY&apos;S LUNCH</span>
+            <div className="eyebrow-row">
+              <span className="eyebrow">TODAY&apos;S LUNCH</span>
+              {visitors && (
+                <span
+                  className="visitor-chip"
+                  title={`${visitors.days}일 동안 누적 ${visitors.total.toLocaleString('ko-KR')}명이 방문했어요`}
+                >
+                  <span className="visitor-dot" />
+                  오늘 {visitors.today.toLocaleString('ko-KR')}
+                  <span className="visitor-total">· 누적 {visitors.total.toLocaleString('ko-KR')}</span>
+                </span>
+              )}
+            </div>
             <span className="date-main">{dateMain}</span>
             <span className="date-sub">{dateSub}</span>
           </div>

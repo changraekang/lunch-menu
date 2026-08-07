@@ -29,3 +29,12 @@ export interface WeatherData {
   sky: string;
   stale?: boolean;
 }
+
+export interface VisitorStats {
+  /** 오늘(KST) 유니크 방문자 수 */
+  today: number;
+  /** 집계 시작 이후 누적 유니크 방문자 수 */
+  total: number;
+  /** 집계된 날짜 수 */
+  days: number;
+}

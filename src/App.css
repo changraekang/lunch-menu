@@ -41,10 +41,43 @@
   gap: 7px;
 }
 
+.eyebrow-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .eyebrow {
   font-size: 12px;
   letter-spacing: 0.08em;
   color: #d64500;
+}
+
+.visitor-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  line-height: 1;
+  color: #6e6a65;
+  background: #f0efec;
+  border-radius: 999px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+.visitor-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #0c6b33;
+  box-shadow: 0 0 0 2px rgba(12, 107, 51, 0.16);
+  flex: 0 0 auto;
+}
+
+.visitor-total {
+  color: #9b9791;
 }
 
 .date-main {

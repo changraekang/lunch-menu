@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://menu.sparkling-rae.com/sitemap.xml

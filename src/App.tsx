@@ -5,6 +5,7 @@ import type { MenuData, MenuEntry, WeatherData } from './types';
 import { computeStatus } from './status';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const ALL_ID = '__all__';
 
 function sourceLabel(postUrl: string): string {
   if (postUrl.includes('instagram.com')) return '인스타그램에서 보기';
@@ -40,6 +41,23 @@ function MenuBody({ place }: { place: MenuEntry }) {
   return <div className="menu-empty">오늘의 메뉴 정보가 아직 준비되지 않았어요</div>;
 }
 
+function GridCard({ place, onSelect }: { place: MenuEntry; onSelect: () => void }) {
+  const status = computeStatus(place.hours);
+  return (
+    <button type="button" className="grid-card" onClick={onSelect}>
+      <div className="grid-card-head">
+        <span className="grid-card-name">{place.name}</span>
+        <span className="grid-card-status" style={{ color: status.color, background: status.bg }}>
+          {status.text}
+        </span>
+      </div>
+      <div className="grid-card-body">
+        <MenuBody place={place} />
+      </div>
+    </button>
+  );
+}
+
 function App() {
   const [menu, setMenu] = useState<MenuData | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -50,7 +68,7 @@ function App() {
     fetchMenu()
       .then((data) => {
         setMenu(data);
-        setActiveId((prev) => prev ?? data.places[0]?.id ?? null);
+        setActiveId((prev) => prev ?? ALL_ID);
       })
       .catch(() => setError(true));
     fetchWeather()
@@ -78,11 +96,12 @@ function App() {
     );
   }
 
-  const place = menu.places.find((p) => p.id === activeId) ?? menu.places[0];
+  const isAllView = activeId === ALL_ID;
+  const place = isAllView ? undefined : menu.places.find((p) => p.id === activeId) ?? menu.places[0];
   const status = computeStatus(place?.hours ?? null);
   const now = new Date();
   const dateMain = `${now.getMonth() + 1}월 ${now.getDate()}일 ${DAYS[now.getDay()]}요일`;
-  const dateSub = `${now.getFullYear()}년 · ${place?.name ?? ''}`;
+  const dateSub = `${now.getFullYear()}년 · ${isAllView ? '전체보기' : place?.name ?? ''}`;
 
   return (
     <div className="page">
@@ -103,6 +122,15 @@ function App() {
         </header>
 
         <nav className="place-tabs">
+          <button
+            type="button"
+            className="place-tab"
+            data-active={isAllView}
+            onClick={() => setActiveId(ALL_ID)}
+          >
+            <span>전체보기</span>
+            <span className="place-tab-bar" />
+          </button>
           {menu.places.map((p) => (
             <button
               key={p.id}
@@ -117,43 +145,55 @@ function App() {
           ))}
         </nav>
 
-        <div className="hours-row">
-          <span className="hours-text">{place?.hours ? place.hours : '영업시간 정보 없음'}</span>
-          <span className="status-badge" style={{ color: status.color, background: status.bg }}>
-            {status.text}
-          </span>
-        </div>
+        {!isAllView && (
+          <div className="hours-row">
+            <span className="hours-text">{place?.hours ? place.hours : '영업시간 정보 없음'}</span>
+            <span className="status-badge" style={{ color: status.color, background: status.bg }}>
+              {status.text}
+            </span>
+          </div>
+        )}
 
-        <div className="menu-card-wrap">
-          <div className="menu-card">
-            <div className="menu-card-head">
-              <span className="menu-label">오늘의 메뉴</span>
-              {place && (
-                <span className="menu-updated">
-                  {new Date(place.updatedAt).toLocaleString('ko-KR', {
-                    month: 'numeric',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}{' '}
-                  기준
-                </span>
+        {isAllView ? (
+          <div className="menu-card-wrap">
+            <div className="grid-2x2">
+              {menu.places.map((p) => (
+                <GridCard key={p.id} place={p} onSelect={() => setActiveId(p.id)} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="menu-card-wrap">
+            <div className="menu-card">
+              <div className="menu-card-head">
+                <span className="menu-label">오늘의 메뉴</span>
+                {place && (
+                  <span className="menu-updated">
+                    {new Date(place.updatedAt).toLocaleString('ko-KR', {
+                      month: 'numeric',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}{' '}
+                    기준
+                  </span>
+                )}
+              </div>
+
+              {place?.stale && <span className="stale-badge">최신 정보가 아닐 수 있어요</span>}
+
+              {place && <MenuBody place={place} />}
+
+              {place?.displayMode !== 'text' && place?.caption && <p className="menu-caption">{place.caption}</p>}
+
+              {place?.postUrl && (
+                <a className="menu-source-link" href={place.postUrl} target="_blank" rel="noreferrer">
+                  {sourceLabel(place.postUrl)} ›
+                </a>
               )}
             </div>
-
-            {place?.stale && <span className="stale-badge">최신 정보가 아닐 수 있어요</span>}
-
-            {place && <MenuBody place={place} />}
-
-            {place?.displayMode !== 'text' && place?.caption && <p className="menu-caption">{place.caption}</p>}
-
-            {place?.postUrl && (
-              <a className="menu-source-link" href={place.postUrl} target="_blank" rel="noreferrer">
-                {sourceLabel(place.postUrl)} ›
-              </a>
-            )}
           </div>
-        </div>
+        )}
 
         <footer className="footer-note">메뉴는 매장 사정에 따라 변경될 수 있습니다</footer>
       </div>

@@ -177,6 +177,88 @@
   gap: 16px;
 }
 
+/* 2x2 overview grid */
+.grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.grid-card {
+  all: unset;
+  cursor: pointer;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 14px 16px;
+  min-width: 0;
+}
+
+.grid-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.grid-card-name {
+  font-size: 14px;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid-card-status {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.grid-card-body .menu-image-link {
+  border-radius: 10px;
+}
+
+.grid-card-body .menu-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.grid-card-body .menu-empty {
+  padding: 20px 0;
+  font-size: 12px;
+  border-radius: 10px;
+}
+
+.grid-card-body .menu-items {
+  gap: 0;
+}
+
+.grid-card-body .menu-item-row {
+  padding: 7px 0;
+  gap: 8px;
+}
+
+.grid-card-body .menu-item-emoji {
+  font-size: 13px;
+}
+
+.grid-card-body .menu-item-name {
+  font-size: 12.5px;
+}
+
+.grid-card-body .menu-item-desc {
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
 .menu-card-head {
   display: flex;
   align-items: center;

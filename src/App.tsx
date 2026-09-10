@@ -119,7 +119,7 @@ function App() {
               {visitors && (
                 <span
                   className="visitor-chip"
-                  title={`${visitors.days}일 동안 누적 ${visitors.total.toLocaleString('ko-KR')}명이 방문했어요`}
+                  title={`${visitors.days}일 동안 누적 ${visitors.total.toLocaleString('ko-KR')}회 조회됐어요`}
                 >
                   <span className="visitor-dot" />
                   오늘 {visitors.today.toLocaleString('ko-KR')}

@@ -31,9 +31,9 @@ export interface WeatherData {
 }
 
 export interface VisitorStats {
-  /** 오늘(KST) 유니크 방문자 수 */
+  /** 오늘(KST) 조회수 */
   today: number;
-  /** 집계 시작 이후 누적 유니크 방문자 수 */
+  /** 집계 시작 이후 누적 조회수 */
   total: number;
   /** 집계된 날짜 수 */
   days: number;

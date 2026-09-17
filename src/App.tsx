@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import { fetchMenu, fetchVisitors, fetchWeather } from './api';
-import type { MenuData, MenuEntry, VisitorStats, WeatherData } from './types';
+import type { CaptionMenuItem, MenuData, MenuEntry, VisitorStats, WeatherData } from './types';
 import { computeStatus } from './status';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -13,21 +13,95 @@ function sourceLabel(postUrl: string): string {
   return '원본 보기';
 }
 
+/** 인스타 캡션을 문단으로 정리한다. 한 줄 바꿈은 이어 붙이고, 빈 줄만 문단 구분으로 남긴다. */
+function captionParagraphs(caption: string): string[] {
+  const lines = caption.split('\n');
+  while (lines.length > 0) {
+    const last = lines[lines.length - 1].trim();
+    if (last === '' || /^(#\S+\s*)+$/.test(last)) {
+      lines.pop();
+      continue;
+    }
+    break;
+  }
+
+  const paragraphs: string[] = [];
+  let current: string[] = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line === '') {
+      if (current.length > 0) {
+        paragraphs.push(current.join(' '));
+        current = [];
+      }
+      continue;
+    }
+    current.push(line);
+  }
+  if (current.length > 0) paragraphs.push(current.join(' '));
+  return paragraphs;
+}
+
+// 문장형 캡션에서 메뉴명만 뽑는다. 긴 접미사(냉채/샐러드)를 먼저 둔다.
+const DISH_NAME =
+  /(?:[가-힣]{2,12}(?:[·&][가-힣]{2,12})*)?(?:냉채|샐러드|카츠|까스|보쌈|겉절이|장아찌|전골|찌개|커틀릿|볶음|무침|조림|수육|만두|잡채|튀김|구이|찜|탕)|(?:[가-힣]{2,12}(?:[·&][가-힣]{2,12})*)(?:국|전|밥|나물)/g;
+
+function dishesFromCaption(caption: string): CaptionMenuItem[] {
+  const text = captionParagraphs(caption).join(' ');
+  const names = text.match(DISH_NAME) ?? [];
+  const unique = [...new Set(names.map((name) => name.trim()).filter(Boolean))];
+  return unique.map((name) => ({ emoji: null, name, desc: null }));
+}
+
+function MenuItems({ items }: { items: NonNullable<MenuEntry['items']> }) {
+  return (
+    <ul className="menu-items">
+      {items.map((item, i) => (
+        <li className="menu-item-row" key={i}>
+          {item.emoji && <span className="menu-item-emoji">{item.emoji}</span>}
+          <span className="menu-item-body">
+            <span className="menu-item-name">{item.name}</span>
+            {item.desc && <span className="menu-item-desc">{item.desc}</span>}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function MenuBody({ place }: { place: MenuEntry }) {
-  if (place.displayMode === 'text' && place.items && place.items.length > 0) {
-    return (
-      <ul className="menu-items">
-        {place.items.map((item, i) => (
-          <li className="menu-item-row" key={i}>
-            {item.emoji && <span className="menu-item-emoji">{item.emoji}</span>}
-            <span className="menu-item-body">
-              <span className="menu-item-name">{item.name}</span>
-              {item.desc && <span className="menu-item-desc">{item.desc}</span>}
-            </span>
-          </li>
-        ))}
-      </ul>
-    );
+  // 논현1647처럼 캡션에 메뉴를 글로 적는 매장. 사진(음식 컷)으로 떨어지면 안 된다.
+  if (place.displayMode === 'text') {
+    if (place.items && place.items.length > 0) {
+      return <MenuItems items={place.items} />;
+    }
+    if (place.caption) {
+      const dishes = dishesFromCaption(place.caption);
+      if (dishes.length >= 2) {
+        const paragraphs = captionParagraphs(place.caption);
+        const title =
+          paragraphs[0] && /오늘의\s*메뉴|금일.*메뉴|오늘의\s*식단/.test(paragraphs[0])
+            ? paragraphs[0]
+            : null;
+        return (
+          <div className="menu-text-block">
+            {title && <p className="menu-text-title">{title}</p>}
+            <MenuItems items={dishes} />
+          </div>
+        );
+      }
+      const paragraphs = captionParagraphs(place.caption);
+      if (paragraphs.length > 0) {
+        return (
+          <div className="menu-text">
+            {paragraphs.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
+        );
+      }
+    }
+    return <div className="menu-empty">오늘의 메뉴 정보가 아직 준비되지 않았어요</div>;
   }
 
   if (place.imageUrl) {

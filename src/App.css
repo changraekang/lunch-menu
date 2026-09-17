@@ -292,6 +292,22 @@
   line-height: 1.4;
 }
 
+.grid-card-body .menu-text {
+  gap: 8px;
+  max-height: calc(1.55em * 8);
+  overflow: hidden;
+}
+
+.grid-card-body .menu-text p {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.grid-card-body .menu-text-title {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
 .menu-card-head {
   display: flex;
   align-items: center;
@@ -379,6 +395,33 @@
   font-size: 12.5px;
   color: #8c8880;
   line-height: 1.5;
+}
+
+.menu-text-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu-text-title {
+  margin: 0;
+  font-size: 14px;
+  color: #8c8880;
+  letter-spacing: -0.02em;
+}
+
+.menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.menu-text p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.75;
+  color: #3f3a36;
+  word-break: keep-all;
 }
 
 .menu-caption {

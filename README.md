@@ -70,4 +70,17 @@ SPA라서 자바스크립트를 실행하지 않는 크롤러에겐 `#root`가 �
 
 ## 배포
 
-`npm run build`로 만든 `dist/`를 nginx가 정적 서빙합니다. 자세한 절차는 `../deploy/DEPLOY.md`를 참고하세요.
+```bash
+npm ci && npm run build   # dist/ 생성 → nginx가 정적 서빙
+```
+
+백엔드는 이 저장소의 `../sparkling-api`이고, EC2에서 pm2 프로세스 `app`으로 떠 있습니다
+(`api.sparkling-rae.com`). 백엔드 코드를 고쳤다면 `pm2 restart app`, `.env`를 고쳤다면
+`pm2 restart app --update-env`가 필요합니다.
+
+메뉴 데이터는 매일 아침 스케줄러가 갱신하지만, 수동으로 다시 긁으려면:
+
+```bash
+curl -X POST https://api.sparkling-rae.com/menu/refresh \
+  -H "x-refresh-token: <sparkling-api/.env의 REFRESH_TOKEN>"
+```

@@ -6,6 +6,39 @@ import { computeStatus } from './status';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const ALL_ID = '__all__';
+const PICKIT_IOS = 'https://apps.apple.com/kr/app/픽킷/id6814712551';
+const PICKIT_ANDROID = 'https://minion.toss.im/5AUSnOdy';
+
+/** 휴대폰에서만 홍보 배너를 띄운다. 아이폰은 앱스토어, 안드로이드는 토스 미니언. */
+function pickitHref(): string | null {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPod/i.test(ua)) return PICKIT_IOS;
+  if (/Android/i.test(ua) && /Mobile/i.test(ua)) return PICKIT_ANDROID;
+  return null;
+}
+
+function PickitBanner() {
+  const [href, setHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setHref(pickitHref());
+  }, []);
+
+  if (!href) return null;
+
+  return (
+    <div className="promo-slot">
+      <a className="promo-banner" href={href} target="_blank" rel="noreferrer">
+        <img className="promo-icon" src="/pickit-icon.webp" alt="" />
+        <span className="promo-copy">
+          <span className="promo-name">픽킷</span>
+          <span className="promo-tagline">점수를 아끼는 맛집리뷰</span>
+        </span>
+        <span className="promo-cta">받기</span>
+      </a>
+    </div>
+  );
+}
 
 function sourceLabel(postUrl: string): string {
   if (postUrl.includes('instagram.com')) return '인스타그램에서 보기';
@@ -188,19 +221,16 @@ function App() {
       <div className="shell">
         <header className="header">
           <div className="header-left">
-            <div className="eyebrow-row">
-              <span className="eyebrow">TODAY&apos;S LUNCH</span>
-              {visitors && (
-                <span
-                  className="visitor-chip"
-                  title={`${visitors.days}일 동안 누적 ${visitors.total.toLocaleString('ko-KR')}회 조회됐어요`}
-                >
-                  <span className="visitor-dot" />
-                  오늘 {visitors.today.toLocaleString('ko-KR')}
-                  <span className="visitor-total">· 누적 {visitors.total.toLocaleString('ko-KR')}</span>
-                </span>
-              )}
-            </div>
+            {visitors && (
+              <span
+                className="visitor-chip"
+                title={`${visitors.days}일 동안 누적 ${visitors.total.toLocaleString('ko-KR')}회 조회됐어요`}
+              >
+                <span className="visitor-dot" />
+                오늘 {visitors.today.toLocaleString('ko-KR')}
+                <span className="visitor-total">· 누적 {visitors.total.toLocaleString('ko-KR')}</span>
+              </span>
+            )}
             <span className="date-main">{dateMain}</span>
             <span className="date-sub">{dateSub}</span>
           </div>
@@ -212,6 +242,8 @@ function App() {
             </span>
           </div>
         </header>
+
+        <PickitBanner />
 
         <nav className="place-tabs">
           <button
